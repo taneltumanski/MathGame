@@ -1,0 +1,24 @@
+<div class="scores">
+    <h3>Scores</h3>
+
+    <div class="container">
+        <div *ngFor="let player of players" class="row">
+            {{ player.name }}: {{ player.score }}
+        </div>
+    </div>
+
+    <div>
+        <span>My name is: <input id="nameBox" (keyup.enter)="updateInfo()" (blur)="updateInfo()" type="text" [(ngModel)]="name" name="name"></span>
+    </div>
+</div>
+
+<div>
+    <h3>Game</h3>
+
+    <div>Is the equation correct? "{{ currentEquation }}"</div>
+    <div>
+        <button (click)="yesClick()" [ngClass]="{disabled : !canAnswer}" class="btn btn-default">Yes</button>
+        <button (click)="noClick()" [ngClass]="{disabled : !canAnswer}" class="btn btn-default">No</button>
+        <span *ngIf="!canAnswer">Please wait while others finish the current round.</span>
+    </div>
+</div>
