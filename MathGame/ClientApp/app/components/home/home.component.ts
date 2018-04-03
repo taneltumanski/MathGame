@@ -104,7 +104,7 @@ export class HomeComponent {
                 this.score = msg.score;
             }
 
-            this.players = this.players.sort((a, b) => a.score == b.score ? 0 : a.score > b.score ? 1 : -1);
+            this.sortPlayers();
         } else if (message.messageType == "PlayerRemoveMessage") {
             msg = message.message as PlayerRemoveMessage;
             let updateMessage = msg as PlayerInfoUpdateMessage;
@@ -114,6 +114,7 @@ export class HomeComponent {
             if (playerIndex != -1) {
                 this.players = this.players.splice(playerIndex, 1);
             }
+            this.sortPlayers();
         } else if (message.messageType == "FullUpdateMessage") {
             msg = message.message as FullUpdateMessage;
 
@@ -130,8 +131,12 @@ export class HomeComponent {
             }
 
             this.canAnswer = false;
-            this.players = this.players.sort((a, b) => a.score == b.score ? 0 : a.score > b.score ? 1 : -1);
+            this.sortPlayers();
         }
+    }
+
+    private sortPlayers() {
+        this.players = this.players.sort((a, b) => a.score == b.score ? 0 : a.score > b.score ? -1 : 1);
     }
 }
 
