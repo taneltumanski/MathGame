@@ -79,7 +79,6 @@ namespace MathGame.Core.Interfaces
     {
         public GamePlayer Player { get; }
 
-        public PlayerRemoveResult(RoundState state) : this(state, null) { }
         public PlayerRemoveResult(RoundState state, GamePlayer Player) : base(state)
         {
             this.Player = Player ?? throw new ArgumentNullException(nameof(Player));

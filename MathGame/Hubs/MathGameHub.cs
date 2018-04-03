@@ -25,8 +25,6 @@ namespace MathGame.Hubs
 
         public Task UpdateInfo(PlayerInfo info)
         {
-            info.Id = info.Id ?? Context.ConnectionId;
-
             return _client.UpdateInfo(info, Context.ConnectionId);
         }
 
