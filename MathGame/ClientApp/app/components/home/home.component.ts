@@ -81,11 +81,9 @@ export class HomeComponent {
             msg = message.message as PlayerInfoUpdateMessage;
             let updateMessage = msg as PlayerInfoUpdateMessage;
 
-            let playerIndex = this.players.findIndex(p => p.id == updateMessage.id);
+            let player = this.players.find(x => x.id == updateMessage.id);
 
-            if (playerIndex != -1) {
-                let player = this.players[playerIndex];
-
+            if (player) {
                 player.id = msg.id;
                 player.name = msg.name;
                 player.score = msg.score;
@@ -109,11 +107,8 @@ export class HomeComponent {
             msg = message.message as PlayerRemoveMessage;
             let updateMessage = msg as PlayerInfoUpdateMessage;
 
-            let playerIndex = this.players.findIndex(p => p.id == updateMessage.id);
+            this.players = this.players.filter(x => x.id != updateMessage.id);
 
-            if (playerIndex != -1) {
-                this.players = this.players.splice(playerIndex, 1);
-            }
             this.sortPlayers();
         } else if (message.messageType == "FullUpdateMessage") {
             msg = message.message as FullUpdateMessage;
