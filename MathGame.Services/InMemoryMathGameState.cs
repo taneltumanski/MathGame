@@ -97,28 +97,14 @@ namespace MathGame.Services
 
                     _roundHistoryArray = _roundHistoryArray.Add(roundHistoryItem);
 
-                    ResetRound();
+                    var winningRoundState = ResetRound();
 
-                    return Task.FromResult(new CheckAnswerResult(GetRoundState(CurrentState), player));
-                }
-                else
-                {
-                    var answeredPlayers = CurrentRound
-                        .AnsweredPlayers
-                        .Select(x => x.Id)
-                        .ToImmutableHashSet();
-
-                    var allPlayersAnswered = CurrentRound
-                        .Players
-                        .All(x => answeredPlayers.Contains(x.Id));
-
-                    if (allPlayersAnswered)
-                    {
-                        ResetRound();
-                    }
+                    return Task.FromResult(new CheckAnswerResult(winningRoundState.State, player));
                 }
 
-                return Task.FromResult(new CheckAnswerResult(GetRoundState(CurrentState)));
+                var roundState = UpdateRoundStatus();
+
+                return Task.FromResult(new CheckAnswerResult(roundState.State));
             }
         }
 
@@ -126,16 +112,18 @@ namespace MathGame.Services
         {
             lock (_lock)
             {
+                var updatePlayer = player;
+
                 if (!_players.TryAdd(player.Id, player))
                 {
-                    var existingPlayer = _players[player.Id];
+                    updatePlayer = _players[player.Id];
 
-                    existingPlayer.Name = player.Name;
+                    updatePlayer.Name = player.Name;
                 }
 
                 var state = UpdateRoundStatus();
 
-                return Task.FromResult(new PlayerUpdateResult(state.State, player));
+                return Task.FromResult(new PlayerUpdateResult(state.State, updatePlayer));
             }
         }
 
@@ -188,14 +176,23 @@ namespace MathGame.Services
                 {
                     var roundPlayers = CurrentRound.Players.ToDictionary(x => x.Id);
                     var connectedPlayers = Players.ToDictionary(x => x.Id);
+                    var connectedRoundPlayers = roundPlayers
+                        .Where(x => connectedPlayers.ContainsKey(x.Key))
+                        .ToArray();
 
-                    var roundHasConnectedPlayers = roundPlayers.Any(x => connectedPlayers.ContainsKey(x.Key));
+                    var roundHasConnectedPlayers = connectedRoundPlayers.Any();
 
                     if (!roundHasConnectedPlayers)
                     {
-                        CurrentState = GameState.Waiting;
+                        return ResetRound();
+                    }
 
-                        return new BaseResult(RoundState.Canceled);
+                    var answeredPlayers = CurrentRound.AnsweredPlayers.ToDictionary(x => x.Id);
+                    var allPlayersAnswered = connectedRoundPlayers.All(x => answeredPlayers.ContainsKey(x.Key));
+
+                    if (allPlayersAnswered)
+                    {
+                        return ResetRound();
                     }
                 }
 
@@ -217,12 +214,12 @@ namespace MathGame.Services
             throw new InvalidOperationException($"State not handled: {CurrentState}");
         }
 
-        private void ResetRound()
+        private BaseResult ResetRound()
         {
             CurrentRound = null;
             CurrentState = GameState.Waiting;
 
-            UpdateRoundStatus();
+            return UpdateRoundStatus();
         }
     }
 }

@@ -81,11 +81,9 @@ export class HomeComponent {
             msg = message.message as PlayerInfoUpdateMessage;
             let updateMessage = msg as PlayerInfoUpdateMessage;
 
-            let playerIndex = this.players.findIndex(p => p.id == updateMessage.id);
+            let player = this.players.find(x => x.id == updateMessage.id);
 
-            if (playerIndex != -1) {
-                let player = this.players[playerIndex];
-
+            if (player) {
                 player.id = msg.id;
                 player.name = msg.name;
                 player.score = msg.score;
@@ -104,16 +102,14 @@ export class HomeComponent {
                 this.score = msg.score;
             }
 
-            this.players = this.players.sort((a, b) => a.score == b.score ? 0 : a.score > b.score ? 1 : -1);
+            this.sortPlayers();
         } else if (message.messageType == "PlayerRemoveMessage") {
             msg = message.message as PlayerRemoveMessage;
             let updateMessage = msg as PlayerInfoUpdateMessage;
 
-            let playerIndex = this.players.findIndex(p => p.id == updateMessage.id);
+            this.players = this.players.filter(x => x.id != updateMessage.id);
 
-            if (playerIndex != -1) {
-                this.players = this.players.splice(playerIndex, 1);
-            }
+            this.sortPlayers();
         } else if (message.messageType == "FullUpdateMessage") {
             msg = message.message as FullUpdateMessage;
 
@@ -130,8 +126,12 @@ export class HomeComponent {
             }
 
             this.canAnswer = false;
-            this.players = this.players.sort((a, b) => a.score == b.score ? 0 : a.score > b.score ? 1 : -1);
+            this.sortPlayers();
         }
+    }
+
+    private sortPlayers() {
+        this.players = this.players.sort((a, b) => a.score == b.score ? 0 : a.score > b.score ? -1 : 1);
     }
 }
 
