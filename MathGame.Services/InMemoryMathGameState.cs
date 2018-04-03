@@ -126,16 +126,18 @@ namespace MathGame.Services
         {
             lock (_lock)
             {
+                var updatePlayer = player;
+
                 if (!_players.TryAdd(player.Id, player))
                 {
-                    var existingPlayer = _players[player.Id];
+                    updatePlayer = _players[player.Id];
 
-                    existingPlayer.Name = player.Name;
+                    updatePlayer.Name = player.Name;
                 }
 
                 var state = UpdateRoundStatus();
 
-                return Task.FromResult(new PlayerUpdateResult(state.State, player));
+                return Task.FromResult(new PlayerUpdateResult(state.State, updatePlayer));
             }
         }
 
