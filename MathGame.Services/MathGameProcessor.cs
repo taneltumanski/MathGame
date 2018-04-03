@@ -74,6 +74,8 @@ namespace MathGame.Services
             {
                 Id = playerKey,
             });
+
+            await TryStartRound(result);
         }
 
         private async Task StartRound()
